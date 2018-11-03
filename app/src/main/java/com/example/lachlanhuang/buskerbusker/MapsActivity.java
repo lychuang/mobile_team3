@@ -133,6 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Address myAddress = addressList.get(i);
             LatLng latlng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
             mo.position(latlng);
+            mo.title(myAddress.getAddressLine(0));
             mMap.addMarker(mo);
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
         }

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "390333864970",
+    "firebase_url": "https://busker-project.firebaseio.com",
+    "project_id": "busker-project",
+    "storage_bucket": "busker-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390333864970:android:247ab23b94f7bff0",
+        "android_client_info": {
+          "package_name": "com.example.lachlanhuang.buskerbusker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390333864970-c4b56q8ha6h829vgsv2djfb26l9lm0ld.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChen9hcN6JRZNuJ3nm5GtcBksL2H3JP3Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
