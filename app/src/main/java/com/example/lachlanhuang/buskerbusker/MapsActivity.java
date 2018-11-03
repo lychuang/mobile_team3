@@ -1,6 +1,7 @@
 package com.example.lachlanhuang.buskerbusker;
 
 import android.Manifest;
+import android.app.slice.SliceItem;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -15,8 +16,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -44,17 +50,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener {
 
     private GoogleMap mMap;
+
+    private View mapView;
+
     private GoogleApiClient client;
     private LocationRequest locationRequest;
     private Location lastLocation;
     private Marker currentLocationMarker;
     public final static int REQUEST_LOCATION_CODE = 99;
 
+    private KeyEvent keyEvent;
+
+    //widgets
+    private EditText mSearchText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        mSearchText = (EditText) findViewById(R.id.input_search);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -64,8 +80,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        mapView = mapFragment.getView();
+
         mapFragment.getMapAsync(this);
+
     }
+
+
+    private void init() {
+
+
+        mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE
+                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
+
+                    //execute method for searching
+                    geoLocate();
+                }
+
+                return false;
+            }
+        });
+    }
+
+
+
+    private void geoLocate() {
+
+        String searchString = mSearchText.getText().toString();
+        List<Address> addressList = new ArrayList<>();
+
+        MarkerOptions mo = new MarkerOptions();
+
+        Geocoder geocoder = new Geocoder(this);
+        try {
+
+            addressList = geocoder.getFromLocationName(searchString, 5);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        for (int i = 0; i < addressList.size(); i++) {
+
+            Address myAddress = addressList.get(i);
+            LatLng latlng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
+            mo.position(latlng);
+            mMap.addMarker(mo);
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+        }
+
+
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -117,6 +191,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+
+
+        if (mapView != null &&
+                mapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 30, 30);
+        }
+
     }
 
 
@@ -203,12 +292,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
+        init();
+
         return true;
 
     }
 
 
-
+/*
     public void onClick (View v) {
 
         List<Address> addressList = new ArrayList<>();
@@ -243,7 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
+*/
 
     @Override
     public void onConnectionSuspended(int i) {
