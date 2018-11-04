@@ -39,6 +39,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -194,6 +200,79 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 
 
+
+        // Get a reference to our posts
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference().child("busker");
+
+
+        final List<BuskerLocation> buskerList = new ArrayList<>();
+
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+/**
+        // Attach a listener to read the data at our posts reference
+        ref.addChildEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                buskerList.clear();
+
+                for (DataSnapshot snaps: dataSnapshot.getChildren()) {
+
+                    BuskerLocation bl = snaps.getValue(BuskerLocation.class);
+                    //System.out.println(bl);
+                    MarkerOptions mo = new MarkerOptions();
+                    mo.title(bl.getBuskerLocName());
+                    mo.position(bl.getBuskerLocLatLng());
+                    mMap.addMarker(mo);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+
+*/
+
+        LatLng brisbane = new LatLng(-28, 153);
+        LatLng boston = new LatLng(42, -71);
+
+
+        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
+
+        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
+
+
+
         if (mapView != null &&
                 mapView.findViewById(Integer.parseInt("1")) != null) {
             // Get the button view
@@ -262,8 +341,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationRequest = new LocationRequest();
 
         // initialise the frequency of polling - arbitrary values atm
-        locationRequest.setInterval(1000);
-        locationRequest.setFastestInterval(1000);
+        locationRequest.setInterval(100);
+        locationRequest.setFastestInterval(100);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         // need to wrap the request in a permission check
