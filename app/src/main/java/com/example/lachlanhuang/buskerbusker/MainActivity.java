@@ -45,23 +45,25 @@ public class MainActivity extends AppCompatActivity {
             checkLocationPermission();
         }
 
+        if (savedInstanceState == null) {
+            setFragment(mapFragment);
+        }
+
+
         // when navigation item is selected
         mainNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.nav_map :
-//                        mainNav.setItemBackgroundResource(R.color.colorPrimary);
                         setFragment(mapFragment);
                         return true;
 
                     case R.id.nav_feed :
-//                        mainNav.setItemBackgroundResource(R.color.colorAccent);
                         setFragment(feedFragment);
                         return true;
 
                     case R.id.nav_account :
-//                        mainNav.setItemBackgroundResource(R.color.colorPrimary);
                         setFragment(accountFragment);
                         return true;
 
