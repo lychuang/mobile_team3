@@ -53,6 +53,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             GoogleApiClient.OnConnectionFailedListener,
             LocationListener {
 
+    private GoogleMap mMap;
+
+    private View mapView;
+
+
+
     public static MapFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -97,6 +103,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         });
 
+        this.mapView = mapView;
 
         return mapView;
     }
@@ -114,9 +121,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
-    private GoogleMap mMap;
 
-    private View mapView;
 
     private GoogleApiClient client;
     private LocationRequest locationRequest;
