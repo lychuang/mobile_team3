@@ -1,8 +1,13 @@
 package com.example.lachlanhuang.buskerbusker;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -20,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private AccountFragment accountFragment;
 
 
+    public final static int REQUEST_LOCATION_CODE = 99;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
         mapFragment = new MapsActivity();
         feedFragment = new FeedFragment();
         accountFragment = new AccountFragment();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            checkLocationPermission();
+        }
 
         // FragmentActivity not the same as Fragment, error with MapsActivity
         // Just use BottomNav with Activities?
@@ -70,4 +82,28 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.main_frame, fragment);
         fragmentTransaction.commit();
     }
+
+
+
+    //check whether the client is connected
+    public boolean checkLocationPermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
+            } else {
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
+
+            }
+            return false;
+
+        }
+
+        return true;
+
+    }
+
 }
