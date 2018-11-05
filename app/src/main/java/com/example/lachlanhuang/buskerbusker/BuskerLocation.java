@@ -1,66 +1,68 @@
 package com.example.lachlanhuang.buskerbusker;
 
 import com.google.android.gms.maps.model.LatLng;
+
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class BuskerLocation {
 
-    private String user_id;
-    private String username;
-    private LatLng latLng = new LatLng(0, 0);
+    public String userId;
+    public String username;
+    public MyLatLng latLng = new MyLatLng(0.0,0.0);
 
 
     private MarkerOptions mo = new MarkerOptions();
 
     //Constructor - will probs take more params later
-    public BuskerLocation(String user_id, String username, LatLng latLng) {
+    public BuskerLocation(String userId, String username, MyLatLng latLng) {
 
-        this.user_id = user_id;
+        this.userId = userId;
         this.username = username;
         this.latLng = latLng;
 
-        mo.position(latLng);
-        mo.title(username);
+        LatLng mapsLatLng = this.latLng.convertToMapsLatLng();
 
+        mo.position(mapsLatLng);
+        mo.title(username);
 
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-        myRef.child("busker").child(user_id).setValue(this);
+        myRef.child("busker").child(userId).setValue(this);
     }
 
-    public BuskerLocation () {
+    public BuskerLocation() {
 
     }
 
-    public String getBuskerLocId() {
+    public String getUserId() {
 
-        return this.user_id;
+        return this.userId;
     }
 
-    public String getBuskerLocName() {
+    public String getUsername() {
 
         return this.username;
     }
 
-    public LatLng getBuskerLocLatLng() {
+    public MyLatLng getLatLng() {
 
         return this.latLng;
     }
 
-    public void setBuskerLocId(String id) {
+    public void setUserId(String id) {
 
-        this.user_id = id;
+        this.userId = id;
     }
 
-    public void setBuskerLocName(String name) {
+    public void setUsername(String name) {
 
         this.username = name;
     }
 
-    public void setBuskerLocLatLng(LatLng latLng) {
+    public void setLatLng(MyLatLng latLng) {
 
         this.latLng = latLng;
     }

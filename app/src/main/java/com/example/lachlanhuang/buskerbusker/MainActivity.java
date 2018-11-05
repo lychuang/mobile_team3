@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView mainNav;
     private FrameLayout mainFrame;
 
-    private MapsActivity mapFragment;
+    private MapFragment mapFragment;
     private FeedFragment feedFragment;
     private AccountFragment accountFragment;
 
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         mainFrame = (FrameLayout) findViewById(R.id.main_frame);
         mainNav = (BottomNavigationView) findViewById(R.id.main_nav);
 
-        mapFragment = new MapsActivity();
+        mapFragment = new MapFragment();
         feedFragment = new FeedFragment();
         accountFragment = new AccountFragment();
 
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
         // FragmentActivity not the same as Fragment, error with MapsActivity
         // Just use BottomNav with Activities?
-        /*mainNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        mainNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-        });*/
+        });
 
 
     }

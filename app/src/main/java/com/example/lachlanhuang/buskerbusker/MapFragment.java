@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -76,6 +77,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         View mapView = inflater.inflate(R.layout.fragment_map, null);
         mSearchText = (EditText) mapView.findViewById(R.id.input_search);
+
+
+        Button button = (Button) mapView.findViewById(R.id.share_location);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View v) {
+
+                if (v.getId() == R.id.share_location) {
+
+                    MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                    String id = String.valueOf(idCount);
+                    idCount++;
+
+                    BuskerLocation bl = new BuskerLocation(id, "Jeremy", latLng);
+                }
+
+            }
+
+        });
+
 
         return mapView;
     }
@@ -276,9 +297,9 @@ System.out.println("The read failed: " + databaseError.getCode());
         MyLatLng boston = new MyLatLng(42.0, -71.0);
 
 
-        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane.convertToMapsLatLng());
+        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
 
-        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston.convertToMapsLatLng());
+        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
 
 
         // Get a reference to our posts
@@ -411,31 +432,6 @@ System.out.println("The read failed: " + databaseError.getCode());
 
 
 
-    public void onClick (View v) {
-
-        if (v.getId() == R.id.share_location) {
-
-            MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-/*
-        //can change color and type of marker later
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("I'M BUSKING HERE!!"); //any name will do
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-
-        //add it to the map
-        mMap.addMarker(markerOptions);
-*/
-            String id = String.valueOf(idCount);
-            idCount++;
-
-
-
-            BuskerLocation bl = new BuskerLocation(id, "Jeremy", latLng.convertToMapsLatLng());
-
-        }
-
-    }
 
 
 /*

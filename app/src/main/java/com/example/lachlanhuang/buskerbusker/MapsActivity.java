@@ -267,12 +267,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng boston = new LatLng(42, -71);
 
 
-        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
-
-        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
-
-
-
         if (mapView != null &&
                 mapView.findViewById(Integer.parseInt("1")) != null) {
             // Get the button view
