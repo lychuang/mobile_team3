@@ -276,9 +276,9 @@ System.out.println("The read failed: " + databaseError.getCode());
         MyLatLng boston = new MyLatLng(42.0, -71.0);
 
 
-        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
+        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane.convertToMapsLatLng());
 
-        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
+        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston.convertToMapsLatLng());
 
 
         // Get a reference to our posts
@@ -431,7 +431,7 @@ System.out.println("The read failed: " + databaseError.getCode());
 
 
 
-            BuskerLocation bl = new BuskerLocation(id, "Jeremy", latLng);
+            BuskerLocation bl = new BuskerLocation(id, "Jeremy", latLng.convertToMapsLatLng());
 
         }
 

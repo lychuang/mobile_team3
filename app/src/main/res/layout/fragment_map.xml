@@ -80,5 +80,15 @@
 
     </RelativeLayout>
 
+    <Button
+        android:id="@+id/share_location"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/search_bar"
+        android:layout_alignEnd="@+id/search_bar"
+        android:onClick="onClick"
+        android:text="Busk Here!" />
+
 
 </RelativeLayout>
