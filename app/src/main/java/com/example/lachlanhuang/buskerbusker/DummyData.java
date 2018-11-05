@@ -7,7 +7,12 @@ public class DummyData {
     public static String[] userNames = new String[] {
             "Robert Lee",
             "John Brown",
-            "Tiffany Chen"
+            "Tiffany Chen",
+            "Ryan",
+            "Brian",
+            "Bobby",
+            "Emily",
+            "Sam"
     };
 
 
