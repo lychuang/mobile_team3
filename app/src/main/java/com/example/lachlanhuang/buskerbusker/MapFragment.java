@@ -46,6 +46,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback,
@@ -53,9 +54,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             GoogleApiClient.OnConnectionFailedListener,
             LocationListener {
 
+    //Interface Variables
     private GoogleMap mMap;
-
     private View mapView;
+
+
+    //Location Requesting Variables
+    private GoogleApiClient client;
+    private LocationRequest locationRequest;
+    private Location lastLocation;
+    private Marker currentLocationMarker;
+
+    //Other Marker Variables
+    private ArrayList<Marker> markers;
+    private int markerCount = 0;
+
+    private HashMap<BuskerLocation, Marker> buskerMarkerHashMap;
+
+    private Marker geoLocateMarker;
+
+    //CHANGE THIS LATER//
+    ///
+    ///
+    ///
+    ///
+    private int idCount = 3;
+
+    private KeyEvent keyEvent;
+
+    //widgets
+    private EditText mSearchText;
+
+    public final static int REQUEST_LOCATION_CODE = 99;
+
+
+    //this is required since this is a fragment
+    private Context mContext;
 
 
 
@@ -68,7 +102,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         return fragment;
     }
 
-    private Context mContext;
 
     @Override
     public void onAttach(Context context) {
@@ -77,12 +110,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         this.mContext = context;
     }
 
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View mapView = inflater.inflate(R.layout.fragment_map, null);
         mSearchText = (EditText) mapView.findViewById(R.id.input_search);
+
+        buskerMarkerHashMap = new HashMap<>();
 
 
         Button button = (Button) mapView.findViewById(R.id.share_location);
@@ -121,46 +158,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
-
-
-    private GoogleApiClient client;
-    private LocationRequest locationRequest;
-    private Location lastLocation;
-    private Marker currentLocationMarker;
-
-    private int idCount = 3;
-
-    private KeyEvent keyEvent;
-
-    //widgets
-    private EditText mSearchText;
-
-
-    public final static int REQUEST_LOCATION_CODE = 99;
-
-
-
-    /*
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-
-
-
-
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-
-        mapView = mapFragment.getView();
-
-        mapFragment.getMapAsync(this);
-
-    }
-
-*/
     private void init() {
 
 
@@ -187,6 +184,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     private void geoLocate() {
 
+        //retrieve the search text
         String searchString = mSearchText.getText().toString();
         List<Address> addressList = new ArrayList<>();
 
@@ -195,11 +193,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         Geocoder geocoder = new Geocoder(this.mContext);
         try {
 
-            addressList = geocoder.getFromLocationName(searchString, 5);
+            addressList = geocoder.getFromLocationName(searchString, 1);
         } catch (IOException e) {
 
             e.printStackTrace();
         }
+
+        //remove the marker from previous search
+        geoLocateMarker.remove();
 
         for (int i = 0; i < addressList.size(); i++) {
 
@@ -207,7 +208,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             LatLng latlng = new LatLng(myAddress.getLatitude(), myAddress.getLongitude());
             mo.position(latlng);
             mo.title(myAddress.getAddressLine(0));
-            mMap.addMarker(mo);
+            geoLocateMarker = mMap.addMarker(mo);
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
         }
 
@@ -267,37 +268,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 
 
-
-
-/**
-// Attach a listener to read the data at our posts reference
-ref.addChildEventListener(new ValueEventListener() {
-@Override
-public void onDataChange(DataSnapshot dataSnapshot) {
-
-buskerList.clear();
-
-for (DataSnapshot snaps: dataSnapshot.getChildren()) {
-
-BuskerLocation bl = snaps.getValue(BuskerLocation.class);
-//System.out.println(bl);
-MarkerOptions mo = new MarkerOptions();
-mo.title(bl.getBuskerLocName());
-mo.position(bl.getBuskerLocLatLng());
-mMap.addMarker(mo);
-
-}
-
-}
-
-@Override
-public void onCancelled(DatabaseError databaseError) {
-System.out.println("The read failed: " + databaseError.getCode());
-}
-});
-
-*/
-
         MyLatLng brisbane = new MyLatLng(-28.0, 153.0);
         MyLatLng boston = new MyLatLng(42.0, -71.0);
 
@@ -322,16 +292,39 @@ System.out.println("The read failed: " + databaseError.getCode());
                 BuskerLocation bl = dataSnapshot.getValue(BuskerLocation.class);
                 //buskerList.add(bl);
 
+
                 MarkerOptions mo = new MarkerOptions();
 
                 mo.position(bl.getLatLng().convertToMapsLatLng());
                 mo.title(bl.getUsername());
 
-                mMap.addMarker(mo);
+                Marker buskMarker = mMap.addMarker(mo);
+
+                //add the new child to the Hash Table
+                buskerMarkerHashMap.put(bl, buskMarker);
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                //here we should
+                //1. remove the marker
+                //2. add the updated position marker
+
+                BuskerLocation bl = dataSnapshot.getValue(BuskerLocation.class);
+
+                //remove the marker
+                buskerMarkerHashMap.get(bl).remove();
+
+                //create new marker, add it
+                MarkerOptions mo = new MarkerOptions();
+
+                mo.position(bl.getLatLng().convertToMapsLatLng());
+                mo.title(bl.getUsername());
+
+                Marker buskMarker = mMap.addMarker(mo);
+
+                //add the updated marker into the Hash Table
+                buskerMarkerHashMap.put(bl, buskMarker); //put overrides old value
 
             }
 
