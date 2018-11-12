@@ -14,11 +14,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -27,15 +30,23 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.ChildEventListener;
@@ -48,11 +59,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback,
             GoogleApiClient.ConnectionCallbacks,
             GoogleApiClient.OnConnectionFailedListener,
             LocationListener {
+
+
+    protected GeoDataClient mGeoDataClient;
 
     //Interface Variables
     private GoogleMap mMap;
@@ -83,9 +98,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private KeyEvent keyEvent;
 
     //widgets
-    private EditText mSearchText;
+    private AutoCompleteTextView mSearchText;
+
+    private PlaceAutocompleteAdapter placeAutocompleteAdapter;
 
     public final static int REQUEST_LOCATION_CODE = 99;
+
+    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
+            new LatLng(-40, -168), new LatLng(71, 136)
+    );
+
+
+    private PlaceInfo mPlaceInfo;
 
 
     //this is required since this is a fragment
@@ -116,11 +140,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        // Construct a GeoDataClient.
+        mGeoDataClient = Places.getGeoDataClient(mContext);
+
         View mapView = inflater.inflate(R.layout.fragment_map, null);
-        mSearchText = (EditText) mapView.findViewById(R.id.input_search);
+        mSearchText = (AutoCompleteTextView) mapView.findViewById(R.id.input_search);
 
         buskerMarkerHashMap = new HashMap<>();
-
 
         Button button = (Button) mapView.findViewById(R.id.share_location);
         button.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +186,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     private void init() {
 
+        placeAutocompleteAdapter = new PlaceAutocompleteAdapter(mContext, mGeoDataClient, LAT_LNG_BOUNDS,null);
+
+        mSearchText.setAdapter(placeAutocompleteAdapter);
+
+        mSearchText.setOnItemClickListener(mAutoCompleteListener);
 
         mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -200,7 +231,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
 
         //remove the marker from previous search
-        geoLocateMarker.remove();
+        if (geoLocateMarker != null) {
+
+            geoLocateMarker.remove();
+        }
 
         for (int i = 0; i < addressList.size(); i++) {
 
@@ -214,6 +248,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
     }
+
+
+    /**
+     * This function will generate a unique id if the user wishes to add a new busker marker to the map/database
+     * @return
+     */
+    private String generateUUID() {
+
+        final String uuid = UUID.randomUUID().toString().replace("-", "");
+        System.out.println("uuid = " + uuid);
+
+        return uuid;
+    }
+
+
 
 
     @Override
@@ -366,6 +415,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         client = new GoogleApiClient.Builder(this.mContext)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
                 .addApi(LocationServices.API)
                 .build();
 
@@ -478,5 +529,70 @@ public void onClick (View v) {
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+
+    /*
+    * ---------------------- GOOGLE PLACES API AUTOCOMPLETE SUGGESTIONS -----------------
+     */
+
+    private AdapterView.OnItemClickListener mAutoCompleteListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int i, long id) {
+
+            final String placeId;
+            final AutocompletePrediction item = placeAutocompleteAdapter.getItem(i);
+            if (item != null) {
+                placeId = item.getPlaceId();
+
+                PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi.getPlaceById(client, placeId);
+                placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            }
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
+
+
+        @Override
+        public void onResult(@NonNull PlaceBuffer places) {
+
+            if (!places.getStatus().isSuccess()) {
+
+                places.release();
+                return;
+            }
+
+            final Place place = places.get(0);
+
+            mPlaceInfo = new PlaceInfo();
+            mPlaceInfo.setAddress(place.getAddress().toString());
+            //mPlaceInfo.setAttributions(place.getAttributions().toString());
+            mPlaceInfo.setId(place.getId());
+            mPlaceInfo.setLatLng(place.getLatLng());
+            mPlaceInfo.setName(place.getName().toString());
+            mPlaceInfo.setPhoneNumber(place.getPhoneNumber().toString());
+            mPlaceInfo.setRating(place.getRating());
+            mPlaceInfo.setWebsiteUri(place.getWebsiteUri());
+
+            //remove the marker from previous search
+            if (geoLocateMarker != null) {
+
+                geoLocateMarker.remove();
+            }
+
+            MarkerOptions mo = new MarkerOptions();
+            mo.position(mPlaceInfo.getLatLng());
+            mo.title(mPlaceInfo.getName());
+            geoLocateMarker = mMap.addMarker(mo);
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(mPlaceInfo.getLatLng()));
+
+        }
+    };
+
+
 }
+
+
 
