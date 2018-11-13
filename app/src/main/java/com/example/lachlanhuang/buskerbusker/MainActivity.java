@@ -1,6 +1,7 @@
 package com.example.lachlanhuang.buskerbusker;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -10,9 +11,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.support.v4.app.Fragment;
+
+import com.example.lachlanhuang.buskerbusker.database.User;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -27,11 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
     public final static int REQUEST_LOCATION_CODE = 99;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         mainFrame = (FrameLayout) findViewById(R.id.main_frame);
         mainNav = (BottomNavigationView) findViewById(R.id.main_nav);
@@ -39,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
         mapFragment = new MapFragment();
         feedFragment = new FeedFragment();
         accountFragment = new AccountFragment();
+
+        Bundle extras = getIntent().getExtras();
+        User user = (User)extras.getSerializable("USER_CLASS");
+
+        String s = String.format("USER = %s", user.getEmail());
+        Log.d("myTag", s);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
