@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.lachlanhuang.buskerbusker.database.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -54,6 +55,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,6 +90,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private HashMap<String, Marker> buskerMarkerHashMap;
 
     private Marker geoLocateMarker;
+
+    private User mUser = new User();
 
     //CHANGE THIS LATER//
     ///
@@ -137,6 +141,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
+    public void setmUser(User user) {
+
+        this.mUser = user;
+    }
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -149,6 +159,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         buskerMarkerHashMap = new HashMap<>();
 
+        Bundle args = getArguments();
+
+        String uid = args.getString("USER_ID", "");
+
+        setmUserId(uid);
+
+        Log.d("TAGA", getmUserId());
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference mUserRef = database.getReference().child("user").child(mUser.getId());
+
+        // Attach a listener to read the data at our posts reference
+        mUserRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                setmUser(dataSnapshot.getValue(User.class));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
+
+
         Button button = (Button) mapView.findViewById(R.id.share_location);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,7 +201,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     String id = String.valueOf(idCount);
                     idCount++;
 
-                    BuskerLocation bl = new BuskerLocation(id, "Jeremy", latLng);
+                    Log.d("TAGA", getmUserId());
+
+                    BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
                 }
 
             }
@@ -211,6 +254,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         });
     }
 
+
+    public void setmUserId(String uid) {
+
+        this.mUser.setId(uid);
+    }
+
+    public String getmUserId() {
+
+        return this.mUser.getId();
+    }
 
 
     private void geoLocate() {

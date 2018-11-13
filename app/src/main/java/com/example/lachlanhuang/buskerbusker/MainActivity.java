@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private User mUser;
 
+    private Bundle args;
+
 
     public final static int REQUEST_LOCATION_CODE = 99;
 
@@ -51,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
 
         String s = String.format("USER = %s", mUser.getId());
         Log.d("myTag", s);
+
+
+        args = new Bundle();
+        args.putString("USER_ID", mUser.getId());
+        mapFragment.setArguments(args);
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
