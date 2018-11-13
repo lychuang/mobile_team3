@@ -17,6 +17,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import static android.R.id.message;
 
@@ -136,6 +138,14 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "createUserWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
 
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference myRef = database.getReference();
+
+                    mUser.setId(user.getUid());
+                    mUser.setEmail(user.getEmail());
+
+                    myRef.child("user").child(mUser.getId()).setValue(mUser);
+
                     signIn(email, password); //sign in and move onto the map
                 } else {
                     // If sign in fails, display a message to the user.
@@ -160,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "signInWithEmail:success");
                     FirebaseUser user = mAuth.getCurrentUser();
 
-                    mUser.setEmail("MOOOOOOO");
+                    mUser.setId(user.getUid());
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.putExtra("USER_CLASS", mUser);

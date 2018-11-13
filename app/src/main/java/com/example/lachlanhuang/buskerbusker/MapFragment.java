@@ -85,7 +85,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private ArrayList<Marker> markers;
     private int markerCount = 0;
 
-    private HashMap<BuskerLocation, Marker> buskerMarkerHashMap;
+    private HashMap<String, Marker> buskerMarkerHashMap;
 
     private Marker geoLocateMarker;
 
@@ -197,15 +197,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 
+            if (actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
 
-                if (actionId == EditorInfo.IME_ACTION_SEARCH
-                        || actionId == EditorInfo.IME_ACTION_DONE
-                        || keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                        || keyEvent.getAction() == KeyEvent.KEYCODE_ENTER) {
-
-                    //execute method for searching
-                    geoLocate();
-                }
+                //execute method for searching
+                geoLocate();
+            }
 
                 return false;
             }
@@ -351,7 +350,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 Marker buskMarker = mMap.addMarker(mo);
 
                 //add the new child to the Hash Table
-                buskerMarkerHashMap.put(bl, buskMarker);
+                buskerMarkerHashMap.put(bl.getUserId(), buskMarker);
             }
 
             @Override
@@ -363,7 +362,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 BuskerLocation bl = dataSnapshot.getValue(BuskerLocation.class);
 
                 //remove the marker
-                buskerMarkerHashMap.get(bl).remove();
+                buskerMarkerHashMap.get(bl.getUserId()).remove();
 
                 //create new marker, add it
                 MarkerOptions mo = new MarkerOptions();
@@ -374,7 +373,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 Marker buskMarker = mMap.addMarker(mo);
 
                 //add the updated marker into the Hash Table
-                buskerMarkerHashMap.put(bl, buskMarker); //put overrides old value
+                buskerMarkerHashMap.put(bl.getUserId(), buskMarker); //put overrides old value
 
             }
 

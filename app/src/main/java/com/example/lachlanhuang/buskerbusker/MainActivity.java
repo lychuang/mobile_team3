@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private FeedFragment feedFragment;
     private AccountFragment accountFragment;
 
+    private User mUser;
+
 
     public final static int REQUEST_LOCATION_CODE = 99;
 
@@ -45,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
         accountFragment = new AccountFragment();
 
         Bundle extras = getIntent().getExtras();
-        User user = (User)extras.getSerializable("USER_CLASS");
+        mUser = (User)extras.getSerializable("USER_CLASS");
 
-        String s = String.format("USER = %s", user.getEmail());
+        String s = String.format("USER = %s", mUser.getId());
         Log.d("myTag", s);
 
 
