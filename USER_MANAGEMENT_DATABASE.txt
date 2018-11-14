@@ -1,0 +1,97 @@
+QUICKSHEET for our DATABASE
+
+Currently I'm storing 2 objects in the database:
+
+BuskerLocation:
+- You guys don't need to worry about this cus it is temporary
+
+User:
+- This stores the information for each user
+- The key is the user id -> unique string generated when they sign up
+- This will be important for the feed and profile
+
+
+
+I give a basic idea of how to manage the Users in Firebase below:
+- Retrieving Specific User Data
+- Retrieving all User Data
+
+- Updating a user's data
+
+
+>>>>>>To retrieve specific user from database: <<<<<<<<<
+
+//This is how to access a specific User object
+
+//this is kinda like getting the path to 'user' directory
+FirebaseDatabase database = FirebaseDatabase.getInstance();
+DatabaseReference mUserRef = database.getReference().child("user").child(mUser.getId());
+
+// Attach a listener to read the data at our posts reference
+mUserRef.addValueEventListener(new ValueEventListener()
+
+@Override
+public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+    mUser = dataSnapshot.getValue(User.class));
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+    }
+});
+
+- The listener will retrieve information upon initialisation and also whenever the user is changed
+
+
+
+
+
+
+
+For the feed I think this is what would be necessary:
+
+
+
+>>>>>>To retrieve and listen on all users from database: <<<<<<<<<
+
+// Get a reference to our posts
+FirebaseDatabase database = FirebaseDatabase.getInstance();
+DatabaseReference ref = database.getReference().child("user");
+
+
+ref.addChildEventListener(new ChildEventListener() {
+    @Override
+    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+	//this one is called at init and when new 'user' is added
+	
+	//deal with 1 user at a time
+    }
+
+    @Override
+    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+	//update info of the changed user here
+    }
+
+
+>>>> there are a few more methods you can override:
+>>>> when you write the ref.addChildEventListener(new ChildEventListener() part you should
+>>>> be prompted to override methods and android studio will add them like above but with more
+
+
+
+
+
+
+>>>>>>>>>>> Updating User's Data <<<<<<<<<<<<<<
+
+FirebaseDatabase database = FirebaseDatabase.getInstance();
+DatabaseReference myRef = database.getReference().child("user);
+
+myRef.child(mUser.getId).setValue(mUser); 
+//something like this - pass the whole object to database
+//make sure the id is correctomundo
+
