@@ -1,9 +1,14 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
+    android:paddingLeft="18dp"
+    android:paddingRight="18dp"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical"
+    android:background="@drawable/login_background"
 
     tools:context=".LoginActivity">
 
@@ -17,6 +22,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="60sp"
+                android:textColor="@color/colorWhite"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:text="Busker" />
 
 
             <EditText
@@ -25,7 +40,13 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColorHint="#fff"
+                android:backgroundTint="#fff"
+
+                android:layout_marginTop="50dp"
+                android:drawableLeft="@drawable/ic_person_white_24dp"
+                android:drawablePadding="12dp"/>
 
 
             <EditText
@@ -37,7 +58,12 @@
                 android:imeActionLabel="@string/action_sign_in_short"
                 android:imeOptions="actionUnspecified"
                 android:inputType="textPassword"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColorHint="#fff"
+                android:backgroundTint="#fff"
+                android:layout_marginTop="8dp"
+                android:drawableLeft="@drawable/ic_lock_white_24dp"
+                android:drawablePadding="12dp"/>
 
             <Button
                 android:id="@+id/email_sign_in_button"
@@ -69,4 +95,4 @@
 
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+</RelativeLayout>
