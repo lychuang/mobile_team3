@@ -163,6 +163,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         String uid = args.getString("USER_ID", "");
 
+        mUser = new User();
         setmUserId(uid);
 
         Log.d("TAGA", getmUserId());
