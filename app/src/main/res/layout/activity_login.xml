@@ -43,7 +43,7 @@
                 android:maxLines="1"
                 android:textColorHint="#fff"
                 android:backgroundTint="#fff"
-
+                android:textColor="#fff"
                 android:layout_marginTop="50dp"
                 android:drawableLeft="@drawable/ic_person_white_24dp"
                 android:drawablePadding="12dp"/>
@@ -61,6 +61,7 @@
                 android:maxLines="1"
                 android:textColorHint="#fff"
                 android:backgroundTint="#fff"
+                android:textColor="#fff"
                 android:layout_marginTop="8dp"
                 android:drawableLeft="@drawable/ic_lock_white_24dp"
                 android:drawablePadding="12dp"/>
