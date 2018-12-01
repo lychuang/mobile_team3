@@ -1,20 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.preference.PreferenceCategory
+    <!-- Not sure whether to make this the page to show likes, following list, etc or general settings page -->
+    <PreferenceCategory
         android:title="Your Profile">
 
         <Preference
             android:key="key1"
             android:title="Update Personal Information" />
 
-        <android.support.v7.preference.EditTextPreference
+        <EditTextPreference
             android:key="key2"
             android:title="Change Your Password"
             android:summary="EditText Summary"
             android:dialogMessage="Dialog Message"
             android:defaultValue="Default value" />
 
-    </android.support.v7.preference.PreferenceCategory>
+        <Preference
+            android:key="key2"
+            android:title="Payments" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Advanced">
+
+        <Preference
+            android:key="key1"
+            android:title="Sign Out" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

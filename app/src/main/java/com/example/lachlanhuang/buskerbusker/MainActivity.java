@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
 
                     case R.id.nav_feed :
-                        setFragment(feedSliderFragment)
+                        setFragment(feedSliderFragment);
                         setFragment(feedFragment);
                         return true;
 

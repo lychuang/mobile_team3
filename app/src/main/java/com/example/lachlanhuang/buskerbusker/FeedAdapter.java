@@ -7,9 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.view.View.OnClickListener;
-
-import static android.support.v4.content.ContextCompat.startActivity;
 
 public class FeedAdapter extends RecyclerView.Adapter {
 
@@ -42,7 +39,7 @@ public class FeedAdapter extends RecyclerView.Adapter {
             // transition to post
             itemView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    Intent intent = new Intent(itemView.getContext(), FeedPost.class);
+                    Intent intent = new Intent(itemView.getContext(), FeedPostActivity.class);
                     itemView.getContext().startActivity(intent);
 
                 }
