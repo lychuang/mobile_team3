@@ -6,6 +6,7 @@ import com.google.android.gms.wallet.Wallet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.util.Optional;
 
 // TODO: add payment gateway and unique merchant identifier (will be shown in PaymentConstants.java)
 
@@ -20,12 +21,12 @@ public class PaymentsUtil {
     }
     /* creates instance of PaymentsClient to use in FeedPostActivity later
      *TODO: work on it/fix it
-
-    public static PaymentsClient createPaymentsClient(Activity activity) {
-        Wallet.WalletOptions walletOptions = new Wallet.WalletOptions().Builder().setEnvironment(PaymentsConstants.PAYMENTS_ENVIRONMENT).build();
-        return Wallet.getPaymentsClient(activity, walletOptions);
-    }
     */
+//    public static PaymentsClient createPaymentsClient(Activity activity) {
+//        Wallet.WalletOptions walletOptions = new Wallet.WalletOptions().Builder().setEnvironment(PaymentsConstants.PAYMENTS_ENVIRONMENT).build();
+//        return Wallet.getPaymentsClient(activity, walletOptions);
+//    }
+
 
 
     /* Google encrypts info about payer's card for secure processing
@@ -75,8 +76,15 @@ public class PaymentsUtil {
         return cardPaymentMethod;
     }
 
+    // describe expected accepted cards
+    private static JSONObject getCardPaymentMethod() throws JSONException {
+        JSONObject cardPaymentMethod = getBaseCardPaymentMethod();
+        cardPaymentMethod.put("tokenizationSpecification", getGatewayTokenizationSpecification());
 
-    // info about the payment
+        return cardPaymentMethod;
+    }
+
+    // give google API info about the payment
     private static JSONObject getTransactionInfo(String price) throws JSONException {
         JSONObject transactionInfo = new JSONObject();
         transactionInfo.put("totalPrice", price);
@@ -85,5 +93,27 @@ public class PaymentsUtil {
 
         return transactionInfo;
     }
+
+    // merchant info
+    private static JSONObject getMerchantInfo() throws JSONException {
+        return new JSONObject().put("merchantName", "Example Merchant");
+    }
+
+    public static Optional<JSONObject> getPaymentDataRequest(String price) {
+        try {
+            JSONObject paymentDataRequest = PaymentsUtil.getBaseRequest();
+            paymentDataRequest.put(
+                    "allowedPaymentMethods", new JSONArray().put(PaymentsUtil.getCardPaymentMethod()));
+            paymentDataRequest.put("transactionInfo", PaymentsUtil.getTransactionInfo(price));
+            paymentDataRequest.put("merchantInfo", PaymentsUtil.getMerchantInfo());
+
+
+            return Optional.of(paymentDataRequest);
+        } catch (JSONException e) {
+            return Optional.empty();
+        }
+    }
+
+
 
 }
