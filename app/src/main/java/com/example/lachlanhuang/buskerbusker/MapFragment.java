@@ -84,8 +84,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private Marker currentLocationMarker;
 
     //Other Marker Variables
-    private ArrayList<Marker> markers;
-    private int markerCount = 0;
+    private Marker touchMarker;
+
 
     private HashMap<String, Marker> buskerMarkerHashMap;
 
@@ -146,6 +146,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         this.mUser = user;
     }
 
+    public void setmUserId(String uid) {
+
+        this.mUser.setId(uid);
+    }
+
+    public String getmUserId() {
+
+        return this.mUser.getId();
+    }
+
 
     @Nullable
     @Override
@@ -154,7 +164,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(mContext);
 
-        View mapView = inflater.inflate(R.layout.fragment_map, null);
+
+        if (mapView != null) {
+
+            mapView = inflater.inflate(R.layout.fragment_map, null);
+            return mapView;
+        }
+
+        mapView = inflater.inflate(R.layout.fragment_map, null, false);
         mSearchText = (AutoCompleteTextView) mapView.findViewById(R.id.input_search);
 
         buskerMarkerHashMap = new HashMap<>();
@@ -189,8 +206,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
-
-
         Button button = (Button) mapView.findViewById(R.id.share_location);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -198,13 +213,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 if (v.getId() == R.id.share_location) {
 
-                    MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    String id = String.valueOf(idCount);
-                    idCount++;
+                    if (touchMarker == null) {
 
-                    Log.d("TAGA", getmUserId());
 
-                    BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
+                        MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                        //Log.d("TAGA", getmUserId());
+
+                        BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
+                    } else {
+
+                        MyLatLng latLng = new MyLatLng(touchMarker.getPosition().latitude,
+                                                        touchMarker.getPosition().longitude);
+                        //Log.d("TAGA", getmUserId());
+
+                        BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
+                    }
+
                 }
 
             }
@@ -215,6 +239,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         return mapView;
     }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -255,16 +280,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         });
     }
 
-
-    public void setmUserId(String uid) {
-
-        this.mUser.setId(uid);
-    }
-
-    public String getmUserId() {
-
-        return this.mUser.getId();
-    }
 
 
     private void geoLocate() {
@@ -315,6 +330,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         return uuid;
     }
+
+
 
 
 
@@ -460,6 +477,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
             layoutParams.setMargins(0, 0, 30, 30);
         }
+
+
+        //TOUCH MARKER INIT
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng point) {
+
+                if (touchMarker != null) {
+
+                    touchMarker.remove();
+                }
+
+                touchMarker = mMap.addMarker(new MarkerOptions().position(point));
+            }
+        });
+
+
 
     }
 
