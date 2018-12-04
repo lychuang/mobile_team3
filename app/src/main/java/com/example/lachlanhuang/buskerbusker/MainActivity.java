@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout mainFrame;
 
     private MapFragment mapFragment;
-    private FeedSliderFragment feedSliderFragment;
     private FeedFragment feedFragment;
     private AccountFragment accountFragment;
 
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
         mainNav = (BottomNavigationView) findViewById(R.id.main_nav);
 
         mapFragment = new MapFragment();
-        feedSliderFragment = new FeedSliderFragment();
         feedFragment = new FeedFragment();
         accountFragment = new AccountFragment();
 
@@ -82,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                         return true;
 
                     case R.id.nav_feed :
-                        setFragment(feedSliderFragment);
                         setFragment(feedFragment);
                         return true;
 
