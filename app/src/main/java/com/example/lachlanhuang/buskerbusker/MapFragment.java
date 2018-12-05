@@ -206,6 +206,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
+
+
+
         Button button = (Button) mapView.findViewById(R.id.share_location);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -397,6 +400,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
 
 
+        mMap.setInfoWindowAdapter(new InfoWindowAdapter(this.mContext));
+
+
+
         // Get a reference to our posts
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference().child("busker");
@@ -417,6 +424,37 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 mo.position(bl.getLatLng().convertToMapsLatLng());
                 mo.title(bl.getUsername());
+
+
+                String time = "12:30";
+                String duration = "1";
+
+                String description = "Lel dis gon be gud hehe!!";
+
+/**
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference ref = database.getReference().child("user").child(bl.getUserId());
+
+                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        User user = new User();
+                        user = dataSnapshot.getValue(User.class);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+
+                });
+**/
+                String snippet = bl.getUserId() + "\n" + "Username: " + bl.getUsername() + "\n" +
+                        "Time: " + time + "\n" + "Duration: " + duration + "\n" +
+                        "Description: " + description;
+
+                mo.snippet(snippet);
 
                 Marker buskMarker = mMap.addMarker(mo);
 
@@ -494,6 +532,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                if (!marker.isInfoWindowShown()) {
+
+                    marker.showInfoWindow();
+                    Log.d("TAGA", "MOOOOOOOO");
+                } else {
+
+                    marker.hideInfoWindow();
+                }
+
+                return false;
+            }
+        });
 
 
     }
