@@ -326,8 +326,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                         //Log.d("TAGA", getmUserId());
 
-                        BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng, mYear,
-                                mMonth, mDay, mHour, mMinute, mDescription);
+                        settingDone = false;
+                        datePicker(latLng);
+
+                        if (settingDone) {
+                            BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng, mYear,
+                                    mMonth, mDay, mHour, mMinute, mDescription);
+                        }
+
                     } else {
 
                         MyLatLng latLng = new MyLatLng(touchMarker.getPosition().latitude,
