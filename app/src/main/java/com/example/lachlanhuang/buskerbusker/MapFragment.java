@@ -1,7 +1,11 @@
 package com.example.lachlanhuang.buskerbusker;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -23,11 +27,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.lachlanhuang.buskerbusker.database.BuskEvent;
+import com.example.lachlanhuang.buskerbusker.database.TimeDate;
 import com.example.lachlanhuang.buskerbusker.database.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -58,10 +66,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback,
@@ -88,6 +100,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
     private HashMap<String, Marker> buskerMarkerHashMap;
+    private HashMap<String, BuskEvent> buskEventHashMap;
 
     private Marker geoLocateMarker;
 
@@ -120,6 +133,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     //this is required since this is a fragment
     private Context mContext;
 
+
+
+    //variables for time/date
+    int mYear;
+    int mMonth;
+    int mDay;
+
+    int mHour;
+    int mMinute;
+
+    int mStartHour;
+    int mStartMin;
+
+    String mDescription;
+
+    boolean settingDone = true;
 
 
     public static MapFragment newInstance() {
@@ -157,6 +186,126 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
 
+
+    private void descriptionRetriever(final MyLatLng latLng) {
+
+
+        final EditText txtUrl = new EditText(mContext);
+
+        txtUrl.setHint("Whatcha gonna do?");
+
+        new AlertDialog.Builder(mContext)
+                .setTitle("Set Description")
+                .setMessage("Write a description of your performance!")
+                .setView(txtUrl)
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        mDescription = txtUrl.getText().toString();
+                        Log.d("TAGA", "Description get");
+                        settingDone = true;
+
+                        TimeDate start = new TimeDate(mYear, mMonth, mDay, mStartHour, mStartMin);
+                        TimeDate end = new TimeDate(mYear, mMonth, mDay, mHour, mMinute);
+
+                        BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng,
+                                start, end, mDescription);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                        dialog.cancel();
+                        settingDone = true;
+                    }
+                })
+                .show();
+    }
+
+
+
+
+    private void datePicker(final MyLatLng latLng){
+
+        // Get Current Date
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(mContext,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+                        //*************Call Time Picker Here ********************
+                        timePicker(latLng, true);
+                    }
+                }, mYear, mMonth, mDay);
+        datePickerDialog.show();
+    }
+
+
+    private void timePicker(final MyLatLng latLng, boolean start){
+        // Get Current Time
+        final boolean startPick = start;
+        final Calendar c = Calendar.getInstance();
+        mHour = c.get(Calendar.HOUR_OF_DAY);
+        mMinute = c.get(Calendar.MINUTE);
+        //mStartHour = mHour;
+        //mStartMin = mMinute;
+
+        // Launch Time Picker Dialog
+        TimePickerDialog timePickerDialog = new TimePickerDialog(mContext,
+                new TimePickerDialog.OnTimeSetListener() {
+
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+
+                        if (startPick) {
+
+                            mHour = hourOfDay;
+                            mMinute = minute;
+
+                            mStartHour = mHour;
+                            mStartMin = mMinute;
+
+                            timePicker(latLng, false);
+
+                        } else {
+
+                            mHour = hourOfDay;
+                            mMinute = minute;
+                            ///////
+                            descriptionRetriever(latLng);
+                        }
+
+
+
+
+                    }
+                }, mHour, mMinute, false);
+
+        if (start) {
+
+            /**LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.text_layout, null);
+            TextView texts=(TextView) dialogView.findViewById(R.id.textss);
+            texts.setText("Set Start Time");
+            timePickerDialog.setCustomTitle(dialogView);*/
+
+            Log.d("TAGA", "SET CUSTOM TITLE");
+            timePickerDialog.setTitle("Choose Start Time");
+            
+        } else {
+            timePickerDialog.setTitle("Choose End Time");
+        }
+        timePickerDialog.show();
+    }
+
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -175,6 +324,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mSearchText = (AutoCompleteTextView) mapView.findViewById(R.id.input_search);
 
         buskerMarkerHashMap = new HashMap<>();
+        buskEventHashMap = new HashMap<>();
 
         Bundle args = getArguments();
 
@@ -222,14 +372,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                         //Log.d("TAGA", getmUserId());
 
-                        BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
+                        settingDone = false;
+                        datePicker(latLng);
+
+                        /**if (settingDone) {
+                            BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng, mYear,
+                                    mMonth, mDay, mHour, mMinute, mDescription);
+                        }**/
+
                     } else {
 
                         MyLatLng latLng = new MyLatLng(touchMarker.getPosition().latitude,
                                                         touchMarker.getPosition().longitude);
                         //Log.d("TAGA", getmUserId());
 
-                        BuskerLocation bl = new BuskerLocation(getmUserId(), getmUserId(), latLng);
+
+
+                        settingDone = false;
+                        datePicker(latLng);
+
+                        //Log.d("TAGA", "moo" + mDay + "mee" + mHour + mDescription);
+                        /**if (settingDone) {
+                            BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng, mYear,
+                                    mMonth, mDay, mHour, mMinute, mDescription);
+                        }**/
+
                     }
 
                 }
@@ -284,6 +451,72 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
 
+    //return 0 if future
+    //       1 if live
+    //       -1 if passed
+    private int isBuskEventNow(BuskEvent event) {
+
+        Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+        mHour = c.get(Calendar.HOUR_OF_DAY);
+        mMinute = c.get(Calendar.MINUTE);
+
+        if (mYear == event.getStartTime().getmYear()) {
+
+            if (mMonth == event.getStartTime().getmMonth()) {
+
+                if (mDay == event.getStartTime().getmDay()) {
+
+                    //now we can compare better
+
+                    if ((mHour >= event.getStartTime().getmHour()) &&
+                            (mHour <= event.getEndTime().getmHour())) { //in the window
+
+
+                    } else if ((mHour >= event.getStartTime().getmHour()) &&
+                            (mHour > event.getEndTime().getmHour())) { //started but already finished
+
+                    }
+
+                } else {
+
+                    return 0;
+                }
+            } else {
+
+                return 0;
+            }
+        } else {
+
+            return 0; //should have been deleted by now so assume its future
+        }
+
+        return 0;
+
+    }
+
+
+    private void updateDisplay() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                Calendar c = Calendar.getInstance();
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+                mHour = c.get(Calendar.HOUR_OF_DAY);
+                mMinute = c.get(Calendar.MINUTE);
+
+            }
+
+        },0,1000);//Update text every second
+    }
+
+
 
     private void geoLocate() {
 
@@ -319,19 +552,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
 
 
-    }
-
-
-    /**
-     * This function will generate a unique id if the user wishes to add a new busker marker to the map/database
-     * @return
-     */
-    private String generateUUID() {
-
-        final String uuid = UUID.randomUUID().toString().replace("-", "");
-        System.out.println("uuid = " + uuid);
-
-        return uuid;
     }
 
 
@@ -395,18 +615,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         MyLatLng boston = new MyLatLng(42.0, -71.0);
 
 
-        BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
+        //BuskerLocation b1 = new BuskerLocation("1", "Lachlan", brisbane);
 
-        BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
+        //BuskerLocation b2 = new BuskerLocation("2", "Tram's Dad", boston);
 
 
         mMap.setInfoWindowAdapter(new InfoWindowAdapter(this.mContext));
 
 
+        //mMap.animateCamera(CameraUpdateFactory.newLatLng());
+
+
+
 
         // Get a reference to our posts
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference().child("busker");
+        DatabaseReference ref = database.getReference().child("buskEvent");
 
 
         //final List<BuskerLocation> buskerList = new ArrayList<>();
@@ -416,7 +640,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
                 //BuskerLocation bl = new BuskerLocation();
-                BuskerLocation bl = dataSnapshot.getValue(BuskerLocation.class);
+                BuskEvent bl = dataSnapshot.getValue(BuskEvent.class);
                 //buskerList.add(bl);
 
 
@@ -430,6 +654,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 String duration = "1";
 
                 String description = "Lel dis gon be gud hehe!!";
+
+                time = String.format("%d:%d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+
+                description = bl.getmDescription();
+
 
 /**
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -460,6 +689,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 //add the new child to the Hash Table
                 buskerMarkerHashMap.put(bl.getUserId(), buskMarker);
+                buskEventHashMap.put(bl.getUserId(), bl);
             }
 
             @Override
@@ -468,10 +698,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 //1. remove the marker
                 //2. add the updated position marker
 
-                BuskerLocation bl = dataSnapshot.getValue(BuskerLocation.class);
+                BuskEvent bl = dataSnapshot.getValue(BuskEvent.class);
 
                 //remove the marker
                 buskerMarkerHashMap.get(bl.getUserId()).remove();
+
 
                 //create new marker, add it
                 MarkerOptions mo = new MarkerOptions();
@@ -479,15 +710,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mo.position(bl.getLatLng().convertToMapsLatLng());
                 mo.title(bl.getUsername());
 
+
+                String time = "12:30";
+                String duration = "1";
+
+                String description = "Lel dis gon be gud hehe!!";
+
+                time = String.format("%d:%d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+
+                description = bl.getmDescription();
+
+                String snippet = bl.getUserId() + "\n" + "Username: " + bl.getUsername() + "\n" +
+                        "Time: " + time + "\n" + "Duration: " + duration + "\n" +
+                        "Description: " + description;
+
+                mo.snippet(snippet);
+
+
                 Marker buskMarker = mMap.addMarker(mo);
 
                 //add the updated marker into the Hash Table
                 buskerMarkerHashMap.put(bl.getUserId(), buskMarker); //put overrides old value
+                buskEventHashMap.put(bl.getUserId(), bl);
 
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                BuskEvent bl = dataSnapshot.getValue(BuskEvent.class);
+                buskEventHashMap.remove(bl.getUserId());
+
+                Log.d("TAGA", "removed a busk event");
+
 
             }
 
@@ -528,7 +783,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     touchMarker.remove();
                 }
 
-                touchMarker = mMap.addMarker(new MarkerOptions().position(point));
+                touchMarker = mMap.addMarker(new MarkerOptions().position(point).title("Touched Here").snippet(""));
             }
         });
 
