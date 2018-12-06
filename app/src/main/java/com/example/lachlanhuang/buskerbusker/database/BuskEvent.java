@@ -14,6 +14,8 @@ public class BuskEvent {
     public MyLatLng latLng = new MyLatLng(0.0,0.0);
 
     private String mDescription;
+
+    /**
     private int mYear;
     private int mMonth;
     private int mDay;
@@ -21,21 +23,22 @@ public class BuskEvent {
     private int mHour;
 
     private int mMinute;
+**/
+
+    private TimeDate startTime;
+    private TimeDate endTime;
 
     private MarkerOptions mo = new MarkerOptions();
 
     //Constructor - will probs take more params later
-    public BuskEvent(String userId, String username, MyLatLng latLng, int year,
-                          int month, int day, int hour, int minute, String description) {
+    public BuskEvent(String userId, String username, MyLatLng latLng, TimeDate startTime,
+                     TimeDate endTime, String description) {
 
         this.userId = userId;
         this.username = username;
         this.latLng = latLng;
-        this.mYear = year;
-        this.mMonth = month;
-        this.mDay = day;
-        this.mHour = hour;
-        this.mMinute = minute;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.mDescription = description;
 
         LatLng mapsLatLng = this.latLng.convertToMapsLatLng();
@@ -92,52 +95,27 @@ public class BuskEvent {
     }
 
 
-    public String getDescription() {
+    public String getmDescription() {
         return mDescription;
     }
 
-    public void setDescription(String description) {
-        this.mDescription = description;
+    public void setmDescription(String mDescription) {
+        this.mDescription = mDescription;
     }
 
-    public int getmYear() {
-        return mYear;
+    public TimeDate getStartTime() {
+        return startTime;
     }
 
-    public void setmYear(int mYear) {
-        this.mYear = mYear;
+    public void setStartTime(TimeDate startTime) {
+        this.startTime = startTime;
     }
 
-    public int getmMonth() {
-        return mMonth;
+    public TimeDate getEndTime() {
+        return endTime;
     }
 
-    public void setmMonth(int mMonth) {
-        this.mMonth = mMonth;
+    public void setEndTime(TimeDate endTime) {
+        this.endTime = endTime;
     }
-
-    public int getmDay() {
-        return mDay;
-    }
-
-    public void setmDay(int mDay) {
-        this.mDay = mDay;
-    }
-
-    public int getmHour() {
-        return mHour;
-    }
-
-    public void setmHour(int mHour) {
-        this.mHour = mHour;
-    }
-
-    public int getmMinute() {
-        return mMinute;
-    }
-
-    public void setmMinute(int mMinute) {
-        this.mMinute = mMinute;
-    }
-
 }
