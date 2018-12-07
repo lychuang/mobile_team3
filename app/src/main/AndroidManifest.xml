@@ -40,10 +40,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,10 +52,11 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_maps">
-            
-        </activity>
-        <activity android:name=".FeedPostActivity"></activity>
+            android:label="@string/title_activity_maps"></activity>
+        <activity android:name=".FeedPostActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>
