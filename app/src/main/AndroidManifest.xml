@@ -52,11 +52,12 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
         <activity android:name=".FeedPostActivity" />
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
+        <activity android:name=".AddPostActivity"></activity>
     </application>
 
 </manifest>
