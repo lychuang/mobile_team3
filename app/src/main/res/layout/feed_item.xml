@@ -1,37 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--This is basically a post row
+    each section of the recyclerView-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!--TODO: fix layout heights and widths-->
+
+    <!--may possibly make post size bigger for more content-->
     <android.support.v7.widget.CardView
 
         android:layout_width="match_parent"
-        android:layout_height="274dp"
+        android:layout_height="350dp"
         android:layout_margin="8dp"
-        app:cardCornerRadius="6dp"
         app:cardElevation="6dp">
-
-
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
+            
+            <ImageView
+                android:id="@+id/item_image"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintLeft_toRightOf="parent"
+                tools:src="@drawable/stock"/>
 
             <TextView
                 android:id="@+id/item_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="22dp"
-                android:layout_weight="3"
-                android:text="Text Here"
-                android:textSize="22sp" />
 
+                android:layout_marginTop="8dp"
+
+                android:layout_weight="3"
+                android:text="@string/placeholder_text"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/item_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_weight="3"
+                android:text="@string/placeholder_text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/placeholder_text"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="4dp" >
+
+                <!--TODO: add more button states-->
+                <ImageButton
+                    android:id="@+id/like_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@color/colorWhiteTransparent"
+                    android:src="@drawable/ic_favorite_border_black_24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:text="20" />
+                
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/share_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:padding="4dp"
+                    android:background="@color/colorWhiteTransparent"
+                    android:src="@drawable/ic_share_black_24dp"/>
+
+
+            </LinearLayout>
         </LinearLayout>
+
+
+
+
+
 
 
     </android.support.v7.widget.CardView>
