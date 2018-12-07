@@ -1,10 +1,15 @@
 package com.example.lachlanhuang.buskerbusker;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -27,12 +32,15 @@ import java.util.Calendar;
 import static android.media.MediaRecorder.VideoSource.CAMERA;
 
 
+
 public class AddPostActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
 
     // I might change this to just a clickable imageview if that's possible
     private ImageButton imageButton;
+
+    private static final int MY_PERMISSIONS_REQUEST_CAMERA = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,8 +111,35 @@ public class AddPostActivity extends AppCompatActivity {
 
     // intent to go to camera activity
     public void photoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, CAMERA);
+
+
+        //check for camera permission
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+            // permission not granted
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                // show explanation to user
+
+
+            } else {
+                // no explanation needed just request permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA},
+                        MY_PERMISSIONS_REQUEST_CAMERA);
+
+
+            }
+
+        } else {
+            // already have permission
+            Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, CAMERA);
+        }
+
+
+
 
     }
 
@@ -139,6 +174,49 @@ public class AddPostActivity extends AppCompatActivity {
             imageButton.setImageBitmap(thumbnail);
 
             Toast.makeText(AddPostActivity.this, "saved", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+//    private void cameraPermissions() {
+//        if (ContextCompat.checkSelfPermission(this,
+//                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+//
+//            // permission not granted
+//
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+//                // show explanation to user
+//
+//
+//            } else {
+//                ActivityCompat.requestPermissions(this,
+//                        new String[]{Manifest.permission.CAMERA},
+//                        MY_PERMISSIONS_REQUEST_CAMERA);
+//            }
+//
+//        }
+//    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMERA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(intent, CAMERA);
+
+                } else {
+                    // permission denied, close activity
+                    finish();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
         }
     }
 
