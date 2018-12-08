@@ -72,6 +72,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -297,7 +298,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
             Log.d("TAGA", "SET CUSTOM TITLE");
             timePickerDialog.setTitle("Choose Start Time");
-            
+
         } else {
             timePickerDialog.setTitle("Choose End Time");
         }
@@ -354,7 +355,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
-
+        updateDisplay();
 
 
 
@@ -457,43 +458,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private int isBuskEventNow(BuskEvent event) {
 
         Calendar c = Calendar.getInstance();
-        mYear = c.get(Calendar.YEAR);
-        mMonth = c.get(Calendar.MONTH);
-        mDay = c.get(Calendar.DAY_OF_MONTH);
-        mHour = c.get(Calendar.HOUR_OF_DAY);
-        mMinute = c.get(Calendar.MINUTE);
+        int mYear = c.get(Calendar.YEAR);
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+        int mHour = c.get(Calendar.HOUR_OF_DAY);
+        int mMinute = c.get(Calendar.MINUTE);
 
-        if (mYear == event.getStartTime().getmYear()) {
+        //Log.d("TAGA", "testing");
 
-            if (mMonth == event.getStartTime().getmMonth()) {
+        int dateCode = (mYear * 10000) + (mMonth * 100) + mDay;
+        int timeCode = mHour * 60 + mMinute;
 
-                if (mDay == event.getStartTime().getmDay()) {
+        int startDateCode = (event.getStartTime().getmYear() * 10000)
+                                + (event.getStartTime().getmMonth() * 100)
+                                + event.getStartTime().getmDay();
 
-                    //now we can compare better
+        int startTimeCode = event.getStartTime().getmHour()*60 + event.getStartTime().getmMinute();
 
-                    if ((mHour >= event.getStartTime().getmHour()) &&
-                            (mHour <= event.getEndTime().getmHour())) { //in the window
+        int endTimeCode = event.getEndTime().getmHour()*60 + event.getEndTime().getmMinute();
 
 
-                    } else if ((mHour >= event.getStartTime().getmHour()) &&
-                            (mHour > event.getEndTime().getmHour())) { //started but already finished
+        //Log.d("TAGA", String.format("date: %d vs %d time: %d in %d to %d", dateCode, startDateCode, timeCode, startTimeCode, endTimeCode));
 
-                    }
+        if (dateCode == startDateCode) { //today
 
-                } else {
 
-                    return 0;
-                }
-            } else {
+            if ((timeCode >= startTimeCode) &&
+                    timeCode <= endTimeCode) { //in the window
+
+                return 1;
+
+            } else if (timeCode > endTimeCode) { //past event
+
+                return -1;
+            } else { //future event
 
                 return 0;
             }
+
+        } else if (dateCode > startDateCode) {
+
+            return -1; //past
         } else {
 
-            return 0; //should have been deleted by now so assume its future
+            return 0; //future date
         }
-
-        return 0;
 
     }
 
@@ -504,16 +513,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
             @Override
             public void run() {
-                Calendar c = Calendar.getInstance();
-                mYear = c.get(Calendar.YEAR);
-                mMonth = c.get(Calendar.MONTH);
-                mDay = c.get(Calendar.DAY_OF_MONTH);
-                mHour = c.get(Calendar.HOUR_OF_DAY);
-                mMinute = c.get(Calendar.MINUTE);
+
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference myRef = database.getReference();
+
+                for(Map.Entry<String, BuskEvent> entry : buskEventHashMap.entrySet()) {
+                    String key = entry.getKey();
+                    BuskEvent event = entry.getValue();
+
+                    int now = isBuskEventNow(event);
+
+                    switch (now) {
+
+                        case 1:
+                            //it's on baby
+                            //maybe set flag in database?
+                            event.setLive(true);
+                            myRef.child("buskEvent").child(event.getUserId()).setValue(event);
+                            break;
+
+                        case 0:
+                            //in the future, leave it
+                            break;
+
+                        case -1:
+                            //should delete from database, check if that removes marker?
+                            //also need to delete from hashmap etc
+                            myRef.child("buskEvent").child(event.getUserId()).removeValue();
+                            break;
+                    }
+                }
 
             }
 
-        },0,1000);//Update text every second
+        },0,5000);//Update text every second
     }
 
 
@@ -685,10 +718,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 mo.snippet(snippet);
 
-                Marker buskMarker = mMap.addMarker(mo);
-
+                //Marker buskMarker = mMap.addMarker(mo);
                 //add the new child to the Hash Table
-                buskerMarkerHashMap.put(bl.getUserId(), buskMarker);
+                //buskerMarkerHashMap.put(bl.getUserId(), buskMarker);
+                //remove the marker straight away, we only add it when it's live
+                //buskerMarkerHashMap.get(bl.getUserId()).remove();
+
+                if (bl.isLive()) {
+
+                    Marker buskMarker = mMap.addMarker(mo);
+                    //add the updated marker into the Hash Table
+                    buskerMarkerHashMap.put(bl.getUserId(), buskMarker); //put overrides old value
+                }
+
+
+                //store the event
                 buskEventHashMap.put(bl.getUserId(), bl);
             }
 
@@ -700,10 +744,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 BuskEvent bl = dataSnapshot.getValue(BuskEvent.class);
 
+/**
+                if (bl.isLive()) {
+
+                    buskerMarkerHashMap.get(bl.getUserId()).isVisible();
+                }
                 //remove the marker
                 buskerMarkerHashMap.get(bl.getUserId()).remove();
 
-
+**/
                 //create new marker, add it
                 MarkerOptions mo = new MarkerOptions();
 
@@ -727,10 +776,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mo.snippet(snippet);
 
 
-                Marker buskMarker = mMap.addMarker(mo);
+                if (bl.isLive()) {
 
-                //add the updated marker into the Hash Table
-                buskerMarkerHashMap.put(bl.getUserId(), buskMarker); //put overrides old value
+                    Marker buskMarker = mMap.addMarker(mo);
+                    //add the updated marker into the Hash Table
+                    buskerMarkerHashMap.put(bl.getUserId(), buskMarker); //put overrides old value
+                }
+
+
                 buskEventHashMap.put(bl.getUserId(), bl);
 
             }
@@ -740,6 +793,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 BuskEvent bl = dataSnapshot.getValue(BuskEvent.class);
                 buskEventHashMap.remove(bl.getUserId());
+
+                //remove the marker from map and hashmap
+                buskerMarkerHashMap.get(bl.getUserId()).remove();
+                buskerMarkerHashMap.remove(bl.getUserId());
 
                 Log.d("TAGA", "removed a busk event");
 
