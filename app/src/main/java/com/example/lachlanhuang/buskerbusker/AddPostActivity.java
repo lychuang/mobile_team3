@@ -40,6 +40,8 @@ public class AddPostActivity extends AppCompatActivity {
     // I might change this to just a clickable imageview if that's possible
     private ImageButton imageButton;
 
+    private static final int GALLERY = 0;
+
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 3;
 
     @Override
@@ -106,7 +108,7 @@ public class AddPostActivity extends AppCompatActivity {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        startActivityForResult(galleryIntent, 0);
+        startActivityForResult(galleryIntent, GALLERY);
     }
 
     // intent to go to camera activity
@@ -154,7 +156,7 @@ public class AddPostActivity extends AppCompatActivity {
         if (resultCode == this.RESULT_CANCELED) {
             return;
         }
-        if (requestCode == 0) {
+        if (requestCode == GALLERY) {
             if (data != null) {
                 Uri contentURI = data.getData();
                 try {
@@ -177,24 +179,6 @@ public class AddPostActivity extends AppCompatActivity {
         }
     }
 
-//    private void cameraPermissions() {
-//        if (ContextCompat.checkSelfPermission(this,
-//                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-//
-//            // permission not granted
-//
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-//                // show explanation to user
-//
-//
-//            } else {
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.CAMERA},
-//                        MY_PERMISSIONS_REQUEST_CAMERA);
-//            }
-//
-//        }
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
