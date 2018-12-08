@@ -69,10 +69,12 @@ import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -147,6 +149,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     int mStartHour;
     int mStartMin;
 
+
+    Calendar mCalendar = new GregorianCalendar();
+    TimeZone mTimeZone = mCalendar.getTimeZone();
+    int timeZone = mTimeZone.getRawOffset();
+
+
     String mDescription;
 
     boolean settingDone = true;
@@ -210,7 +218,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         TimeDate end = new TimeDate(mYear, mMonth, mDay, mHour, mMinute);
 
                         BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng,
-                                start, end, mDescription);
+                                start, end, timeZone, mDescription);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -469,6 +477,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         int dateCode = (mYear * 10000) + (mMonth * 100) + mDay;
         int timeCode = mHour * 60 + mMinute;
 
+
+        int timeZoneEffect = (timeZone / 60000) - (event.getTimeZone() / 60000); // mins different
+
         int startDateCode = (event.getStartTime().getmYear() * 10000)
                                 + (event.getStartTime().getmMonth() * 100)
                                 + event.getStartTime().getmDay();
@@ -478,7 +489,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         int endTimeCode = event.getEndTime().getmHour()*60 + event.getEndTime().getmMinute();
 
 
+        //timezone management
+        int shiftedStart = startTimeCode + timeZoneEffect;
+        int shiftedEnd = endTimeCode + timeZoneEffect;
+
+        if (shiftedStart < 0) {
+
+            startDateCode -= 1;
+            startTimeCode = 24 * 60 + shiftedStart;
+            endTimeCode = 24 * 60 + shiftedEnd;
+        } else if (shiftedStart > (24 * 60 - 1)) {
+
+            startDateCode += 1;
+            startTimeCode = shiftedStart - 24 * 60;
+            endTimeCode = shiftedEnd - 24 * 60;
+        } else {
+
+            startTimeCode = shiftedStart;
+            endTimeCode = shiftedEnd;
+        }
+
         //Log.d("TAGA", String.format("date: %d vs %d time: %d in %d to %d", dateCode, startDateCode, timeCode, startTimeCode, endTimeCode));
+
+        Log.d("TAGA", String.format("timezone: %d", timeZone));
 
         if (dateCode == startDateCode) { //today
 

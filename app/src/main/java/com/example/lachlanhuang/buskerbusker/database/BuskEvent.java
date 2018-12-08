@@ -29,13 +29,23 @@ public class BuskEvent {
     private TimeDate endTime;
     private boolean live;
 
+    private int timeZone;
+
+    public int getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(int timeZone) {
+        this.timeZone = timeZone;
+    }
+
     private MarkerOptions mo = new MarkerOptions();
 
 
 
     //Constructor - will probs take more params later
     public BuskEvent(String userId, String username, MyLatLng latLng, TimeDate startTime,
-                     TimeDate endTime, String description) {
+                     TimeDate endTime, int timeZone, String description) {
 
         this.userId = userId;
         this.username = username;
