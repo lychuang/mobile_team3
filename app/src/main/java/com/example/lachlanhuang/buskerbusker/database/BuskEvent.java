@@ -27,8 +27,11 @@ public class BuskEvent {
 
     private TimeDate startTime;
     private TimeDate endTime;
+    private boolean live;
 
     private MarkerOptions mo = new MarkerOptions();
+
+
 
     //Constructor - will probs take more params later
     public BuskEvent(String userId, String username, MyLatLng latLng, TimeDate startTime,
@@ -40,6 +43,8 @@ public class BuskEvent {
         this.startTime = startTime;
         this.endTime = endTime;
         this.mDescription = description;
+        this.live = false;
+
 
         LatLng mapsLatLng = this.latLng.convertToMapsLatLng();
 
@@ -117,5 +122,13 @@ public class BuskEvent {
 
     public void setEndTime(TimeDate endTime) {
         this.endTime = endTime;
+    }
+
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
     }
 }
