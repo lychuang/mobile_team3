@@ -6,11 +6,18 @@ import com.google.android.gms.wallet.Wallet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
+
+import static java.time.temporal.ChronoUnit.MICROS;
 
 // TODO: add payment gateway and unique merchant identifier (will be shown in PaymentConstants.java)
 
 public class PaymentsUtil {
+
+    private static final BigDecimal MICROS = new BigDecimal(1000000d);
 
     private PaymentsUtil() {}
 
@@ -19,13 +26,13 @@ public class PaymentsUtil {
                 .put("apiVersion", 2)
                 .put("apiVersionMinor", 0);
     }
-    /* creates instance of PaymentsClient to use in FeedPostActivity later
-     *TODO: work on it/fix it
-    */
-//    public static PaymentsClient createPaymentsClient(Activity activity) {
-//        Wallet.WalletOptions walletOptions = new Wallet.WalletOptions().Builder().setEnvironment(PaymentsConstants.PAYMENTS_ENVIRONMENT).build();
-//        return Wallet.getPaymentsClient(activity, walletOptions);
-//    }
+    // creates instance of PaymentsClient to use in FeedPostActivity later
+
+    public static PaymentsClient createPaymentsClient(Activity activity) {
+        Wallet.WalletOptions walletOptions =
+                new Wallet.WalletOptions.Builder().setEnvironment(PaymentsConstants.PAYMENTS_ENVIRONMENT).build();
+        return Wallet.getPaymentsClient(activity, walletOptions);
+    }
 
 
 
@@ -84,6 +91,18 @@ public class PaymentsUtil {
         return cardPaymentMethod;
     }
 
+    public static Optional<JSONObject> getIsReadyToPayRequest() {
+        try {
+            JSONObject isReadyToPayRequest = getBaseRequest();
+            isReadyToPayRequest.put(
+                    "allowedPaymentMethods", new JSONArray().put(getBaseCardPaymentMethod()));
+
+            return Optional.of(isReadyToPayRequest);
+        } catch (JSONException e) {
+            return Optional.empty();
+        }
+    }
+
     // give google API info about the payment
     private static JSONObject getTransactionInfo(String price) throws JSONException {
         JSONObject transactionInfo = new JSONObject();
@@ -112,6 +131,10 @@ public class PaymentsUtil {
         } catch (JSONException e) {
             return Optional.empty();
         }
+    }
+
+    public static String microsToString(long micros) {
+        return new BigDecimal(micros).divide(MICROS).setScale(2, RoundingMode.HALF_EVEN).toString();
     }
 
 

@@ -33,7 +33,7 @@ public class PaymentsConstants {
     /* name of payment processor
      * change later
      */
-    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "busker";
+    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "example";
 
     public static final HashMap<String, String> PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS =
             new HashMap<String, String>() {
