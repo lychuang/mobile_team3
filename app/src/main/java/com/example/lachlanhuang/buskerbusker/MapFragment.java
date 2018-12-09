@@ -1,6 +1,7 @@
 package com.example.lachlanhuang.buskerbusker;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -138,6 +139,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
 
+
+
+    private DatePickerDialog datePickerDialog;
+
     //variables for time/date
     int mYear;
     int mMonth;
@@ -217,6 +222,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         TimeDate start = new TimeDate(mYear, mMonth, mDay, mStartHour, mStartMin);
                         TimeDate end = new TimeDate(mYear, mMonth, mDay, mHour, mMinute);
 
+                        Calendar mCalendar = new GregorianCalendar();
+                        TimeZone mTimeZone = mCalendar.getTimeZone();
+                        timeZone = mTimeZone.getRawOffset();
+
                         BuskEvent buskEvent = new BuskEvent(getmUserId(), getmUserId(), latLng,
                                 start, end, timeZone, mDescription);
                     }
@@ -242,7 +251,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(mContext,
+        datePickerDialog = new DatePickerDialog(getActivity(),
                 new DatePickerDialog.OnDateSetListener() {
 
                     @Override
@@ -252,7 +261,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         timePicker(latLng, true);
                     }
                 }, mYear, mMonth, mDay);
+
+        datePickerDialog.setTitle("MOO");
         datePickerDialog.show();
+
+
     }
 
 
@@ -265,8 +278,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         //mStartHour = mHour;
         //mStartMin = mMinute;
 
+        //TimePickerDialog p = new TimePickerDialog.Builder(mContext)
         // Launch Time Picker Dialog
-        TimePickerDialog timePickerDialog = new TimePickerDialog(mContext,
+        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(),
                 new TimePickerDialog.OnTimeSetListener() {
 
                     @Override
@@ -296,6 +310,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     }
                 }, mHour, mMinute, false);
 
+        timePickerDialog.show();
+
         if (start) {
 
             /**LayoutInflater inflater = this.getLayoutInflater();
@@ -310,7 +326,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         } else {
             timePickerDialog.setTitle("Choose End Time");
         }
-        timePickerDialog.show();
+
     }
 
 
@@ -323,11 +339,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mGeoDataClient = Places.getGeoDataClient(mContext);
 
 
-        if (mapView != null) {
+        /**if (mapView != null) {
 
             mapView = inflater.inflate(R.layout.fragment_map, null);
             return mapView;
-        }
+        }**/
 
         mapView = inflater.inflate(R.layout.fragment_map, null, false);
         mSearchText = (AutoCompleteTextView) mapView.findViewById(R.id.input_search);
@@ -375,9 +391,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
                 if (v.getId() == R.id.share_location) {
 
+                    Log.d("COOOWEEE", "CLICK");
                     if (touchMarker == null) {
 
-
+                        Log.d("COOOWEEE", "not null");
                         MyLatLng latLng = new MyLatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                         //Log.d("TAGA", getmUserId());
 
@@ -479,6 +496,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
 
         int timeZoneEffect = (timeZone / 60000) - (event.getTimeZone() / 60000); // mins different
+
+        Log.d("TAGA", String.format("timezone %d, event tz %d", timeZone, event.getTimeZone()));
 
         int startDateCode = (event.getStartTime().getmYear() * 10000)
                                 + (event.getStartTime().getmMonth() * 100)
@@ -715,47 +734,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mo.position(bl.getLatLng().convertToMapsLatLng());
                 mo.title(bl.getUsername());
 
-
-                String time = "12:30";
+                String sTime = "12:30";
+                String eTime = "idk";
                 String duration = "1";
 
                 String description = "Lel dis gon be gud hehe!!";
 
-                time = String.format("%d:%d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+                sTime = String.format("%02d:%02d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+                eTime = String.format("%02d:%02d", bl.getEndTime().getmHour(), bl.getEndTime().getmMinute());
 
                 description = bl.getmDescription();
 
-
-/**
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference ref = database.getReference().child("user").child(bl.getUserId());
-
-                ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        User user = new User();
-                        user = dataSnapshot.getValue(User.class);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-
-                });
-**/
-                String snippet = bl.getUserId() + "\n" + "Username: " + bl.getUsername() + "\n" +
-                        "Time: " + time + "\n" + "Duration: " + duration + "\n" +
+                String snippet = "Start Time: " + sTime + "\n" + "End Time: " + eTime + "\n" +
                         "Description: " + description;
 
                 mo.snippet(snippet);
-
-                //Marker buskMarker = mMap.addMarker(mo);
-                //add the new child to the Hash Table
-                //buskerMarkerHashMap.put(bl.getUserId(), buskMarker);
-                //remove the marker straight away, we only add it when it's live
-                //buskerMarkerHashMap.get(bl.getUserId()).remove();
 
                 if (bl.isLive()) {
 
@@ -792,18 +785,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mo.position(bl.getLatLng().convertToMapsLatLng());
                 mo.title(bl.getUsername());
 
-
-                String time = "12:30";
+                String sTime = "12:30";
+                String eTime = "idk";
                 String duration = "1";
 
                 String description = "Lel dis gon be gud hehe!!";
 
-                time = String.format("%d:%d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+                sTime = String.format("%02d:%02d", bl.getStartTime().getmHour(), bl.getStartTime().getmMinute());
+                eTime = String.format("%02d:%02d", bl.getEndTime().getmHour(), bl.getEndTime().getmMinute());
 
                 description = bl.getmDescription();
 
-                String snippet = bl.getUserId() + "\n" + "Username: " + bl.getUsername() + "\n" +
-                        "Time: " + time + "\n" + "Duration: " + duration + "\n" +
+                String snippet = "Start Time: " + sTime + "\n" + "End Time: " + eTime + "\n" +
                         "Description: " + description;
 
                 mo.snippet(snippet);
@@ -873,7 +866,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     touchMarker.remove();
                 }
 
-                touchMarker = mMap.addMarker(new MarkerOptions().position(point).title("Touched Here").snippet(""));
+                touchMarker = mMap.addMarker(new MarkerOptions().position(point).title("Touched Here").snippet(" "));
             }
         });
 
@@ -933,6 +926,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Location"); //any name will do
+        markerOptions.snippet("You are here!");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
 
         //add it to the map

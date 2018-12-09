@@ -53,6 +53,7 @@ public class BuskEvent {
         this.startTime = startTime;
         this.endTime = endTime;
         this.mDescription = description;
+        this.timeZone = timeZone;
         this.live = false;
 
 
