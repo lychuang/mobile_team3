@@ -78,6 +78,19 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:text="20" />
+
+                <ImageButton
+                    android:id="@+id/comment_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@color/colorWhiteTransparent"
+                    android:src="@drawable/ic_chat_bubble_outline_black_24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:text="4" />
                 
                 <Space
                     android:layout_width="0dp"
