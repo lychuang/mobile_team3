@@ -14,20 +14,35 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.media.MediaRecorder;
 import android.content.Intent;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import com.example.lachlanhuang.buskerbusker.database.Post;
+import com.example.lachlanhuang.buskerbusker.database.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.media.MediaRecorder.VideoSource.CAMERA;
 
@@ -35,10 +50,28 @@ import static android.media.MediaRecorder.VideoSource.CAMERA;
 
 public class AddPostActivity extends AppCompatActivity {
 
+    private static final String TAG = "AddPostActivity";
+    private static final String REQUIRED = "Required";
+
+
+
+    FirebaseDatabase database;
+    DatabaseReference ref;
+
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabaseUsers; private FirebaseUser mCurrentUser;
+//    private FirebaseAuth.AuthStateListener;
+
     private Toolbar toolbar;
 
     // I might change this to just a clickable imageview if that's possible
     private ImageButton imageButton;
+    private Button postButton;
+
+    private EditText buskerNameField;
+    private EditText textDescField;
+
+
 
     private static final int GALLERY = 0;
 
@@ -51,7 +84,19 @@ public class AddPostActivity extends AppCompatActivity {
 
         setUpToolbar();
 
+
+        buskerNameField = (EditText) findViewById(R.id.busker_name);
+        textDescField = (EditText) findViewById(R.id.post_description);
         imageButton = (ImageButton) findViewById(R.id.photo_gallery_button);
+        postButton = (Button) findViewById(R.id.post_btn);
+
+        postButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addPost();
+            }
+        });
+
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,8 +105,91 @@ public class AddPostActivity extends AppCompatActivity {
             }
         });
 
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUser = mAuth.getCurrentUser();
+
+        database = FirebaseDatabase.getInstance();
+
+        ref = FirebaseDatabase.getInstance().getReference();
+
+
+
+
 
     }
+
+    private void addPost() {
+        final String buskerName = buskerNameField.getText().toString();
+        final String textDesc = textDescField.getText().toString();
+
+        // Title is required
+        if (TextUtils.isEmpty(buskerName)) {
+            buskerNameField.setError(REQUIRED);
+            return;
+        }
+
+        // Body is required
+        if (TextUtils.isEmpty(textDesc)) {
+            textDescField.setError(REQUIRED);
+            return;
+        }
+
+
+        Toast.makeText(this, "Posting...", Toast.LENGTH_SHORT).show();
+
+
+        final String userId = mCurrentUser.getUid();
+
+        ref.child("user").child(userId).addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // Get user value
+                        User user = dataSnapshot.getValue(User.class);
+
+
+                        if (user == null) {
+
+                            Log.e(TAG, "User " + userId + " is unexpectedly null");
+                            Toast.makeText(AddPostActivity.this,
+                                    "Error: could not fetch user.",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Write new post
+                            writeNewPost(userId, user.getName(), buskerName, textDesc);
+                        }
+
+                        // Finish this Activity, back to the stream
+
+                        finish();
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+
+                    }
+                });
+
+
+
+    }
+
+
+    private void writeNewPost(String userId, String username, String title, String body) {
+        // create in two paths simultaneously
+        String key = ref.child("posts").push().getKey();
+        Post post = new Post(userId, username, title, body);
+        Map<String, Object> postValues = post.toMap();
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put("/posts/" + key, postValues);
+        childUpdates.put("/user-posts/" + userId + "/" + key, postValues);
+
+        ref.updateChildren(childUpdates);
+    }
+
 
     // method to set up toolbar and navigation
     private void setUpToolbar() {

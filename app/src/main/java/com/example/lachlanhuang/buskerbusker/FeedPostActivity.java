@@ -2,6 +2,8 @@ package com.example.lachlanhuang.buskerbusker;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -15,15 +17,31 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.Cart;
+import com.google.android.gms.wallet.FullWallet;
+import com.google.android.gms.wallet.FullWalletRequest;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.LineItem;
+import com.google.android.gms.wallet.MaskedWallet;
+import com.google.android.gms.wallet.MaskedWalletRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
+import com.google.android.gms.wallet.Wallet;
+import com.google.android.gms.wallet.WalletConstants;
+import com.google.android.gms.wallet.fragment.BuyButtonText;
+import com.google.android.gms.wallet.fragment.SupportWalletFragment;
+import com.google.android.gms.wallet.fragment.WalletFragmentInitParams;
+import com.google.android.gms.wallet.fragment.WalletFragmentMode;
+import com.google.android.gms.wallet.fragment.WalletFragmentOptions;
+import com.google.android.gms.wallet.fragment.WalletFragmentStyle;
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator;
 
 import org.json.JSONException;
@@ -31,7 +49,8 @@ import org.json.JSONObject;
 
 import java.util.Optional;
 
-public class FeedPostActivity extends AppCompatActivity {
+public class FeedPostActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient
+        .OnConnectionFailedListener {
 
     // images downloaded from the web for the sake of V I S U A L S
     // rando european places
@@ -49,6 +68,19 @@ public class FeedPostActivity extends AppCompatActivity {
     private PaymentsClient paymentsClient;
     private Button tipButton;
 
+    private GoogleApiClient mGoogleApiClient;
+    private SupportWalletFragment mWalletFragment;
+    private SupportWalletFragment mXmlWalletFragment;
+
+    private MaskedWallet mMaskedWallet;
+    private FullWallet mFullWallet;
+
+
+    public static final int MASKED_WALLET_REQUEST_CODE = 888;
+    public static final int FULL_WALLET_REQUEST_CODE = 889;
+
+    public static final String WALLET_FRAGMENT_ID = "wallet_fragment";
+
     private long totalCost = 90 * 1000000;
 
     private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 991;
@@ -60,6 +92,7 @@ public class FeedPostActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_post);
+
 
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         springDotsIndicator = (SpringDotsIndicator) findViewById(R.id.spring_dots_indicator);
@@ -74,6 +107,45 @@ public class FeedPostActivity extends AppCompatActivity {
 
         tipButton = findViewById(R.id.tip_btn);
 
+
+//        mWalletFragment = (SupportWalletFragment) getSupportFragmentManager().findFragmentByTag(WALLET_FRAGMENT_ID);
+//
+//        WalletFragmentInitParams startParams;
+//        WalletFragmentInitParams.Builder startParamBuilder = WalletFragmentInitParams.newBuilder()
+//                .setMaskedWalletRequest(generateMaskedWalletRequest());
+//
+//        startParams = startParamBuilder.build();
+//
+//        if (mWalletFragment == null) {
+//            WalletFragmentStyle walletFragmentStyle = new WalletFragmentStyle()
+//                    .setBuyButtonText(WalletFragmentStyle.BuyButtonText.BUY_WITH)
+//                    .setBuyButtonWidth(WalletFragmentStyle.Dimension.MATCH_PARENT);
+//
+//            WalletFragmentOptions walletFragmentOptions = WalletFragmentOptions.newBuilder()
+//                    .setEnvironment(WalletConstants.ENVIRONMENT_SANDBOX)
+//                    .setFragmentStyle(walletFragmentStyle)
+//                    .setTheme(WalletConstants.THEME_DARK)
+//                    .setMode(WalletFragmentMode.BUY_BUTTON)
+//                    .build();
+//
+//            mWalletFragment = SupportWalletFragment.newInstance(walletFragmentOptions);
+//
+//            mWalletFragment.initialize(startParams);
+//        }
+//
+//        getSupportFragmentManager().beginTransaction().replace(R.id.wallet_button_holder, mWalletFragment, WALLET_FRAGMENT_ID)
+//                .commit();
+//
+//
+//        mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this).addApi(Wallet.API, new Wallet.WalletOptions.Builder()
+//                        .setEnvironment(WalletConstants.ENVIRONMENT_SANDBOX)
+//                        .setTheme(WalletConstants.THEME_DARK)
+//                        .build())
+//                .build();
+
+
+
         paymentsClient = PaymentsUtil.createPaymentsClient(this);
         possiblyShowGooglePayButton();
 
@@ -87,6 +159,91 @@ public class FeedPostActivity extends AppCompatActivity {
 
 //
     }
+
+//    @Override
+//    protected void onStart() {
+//        mGoogleApiClient.connect();
+//        super.onStart();
+//    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, this);
+//
+//        switch (requestCode) {
+//            case MASKED_WALLET_REQUEST_CODE:
+//                switch (resultCode) {
+//                    case Activity.RESULT_OK:
+//                        mMaskedWallet = data.getParcelableExtra(WalletConstants.EXTRA_MASKED_WALLET);
+//                        break;
+//
+//
+//                    case Activity.RESULT_CANCELED:
+//                        break;
+//
+//                    default:
+//                        Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
+//                        break;
+//                }
+//                break;
+//            case FULL_WALLET_REQUEST_CODE:
+//                switch (resultCode) {
+//                    case Activity.RESULT_OK:
+//                        mFullWallet = data.getParcelableExtra(WalletConstants.EXTRA_FULL_WALLET);
+//                        Toast.makeText(this, mFullWallet.getProxyCard().getPan().toString(), Toast.LENGTH_SHORT).show();
+//                        break;
+//
+//                    default:
+//                        Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
+//                        break;
+//                }
+//                break;
+//            case WalletConstants.RESULT_ERROR:
+//                Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
+//                break;
+//
+//        }
+//    }
+
+//    public static NotifyTransactionStatusRequest generateNotifyTransactionStatusRequest(String googleTransactionId, int status) {
+//
+//    }
+
+//    private MaskedWalletRequest generateMaskedWalletRequest() {
+//        MaskedWalletRequest maskedWalletRequest = MaskedWalletRequest.newBuilder()
+//                .setMerchantName("GOOGLE")
+//                .setPhoneNumberRequired(true)
+//                .setShippingAddressRequired(true)
+//                .setCurrencyCode("USD")
+//
+//                .setEstimatedTotalPrice("10.00")
+//                .build();
+//        return maskedWalletRequest;
+//    }
+
+//    private FullWalletRequest generateFullWalletRequest(String googleTransactionID) {
+//        FullWalletRequest fullWalletRequest = FullWalletRequest.newBuilder()
+//                .setCart(Cart.newBuilder()
+//                        .setCurrencyCode("USD")
+//                        .setTotalPrice("10.10")
+//                        .addLineItem(LineItem.newBuilder()
+//                                .setCurrencyCode("USD")
+//                                .setQuantity("1")
+//                                .setUnitPrice("10.00")
+//                                .setTotalPrice("10.00")
+//                                .build())
+//                        .build())
+//                .build();
+//        return fullWalletRequest;
+//    }
+
+//    public void requestFullWallet() {
+//        if (mGoogleApiClient.isConnected()) {
+//            Wallet.Payments.loadFullWallet(mGoogleApiClient,
+//                    generateFullWalletRequest(mMaskedWallet.getGoogleTransactionId()),
+//                    FULL_WALLET_REQUEST_CODE);
+//        }
+//    }
 
     private void possiblyShowGooglePayButton() {
         final Optional<JSONObject> isReadyToPayJson = PaymentsUtil.getIsReadyToPayRequest();
@@ -214,4 +371,18 @@ public class FeedPostActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }
