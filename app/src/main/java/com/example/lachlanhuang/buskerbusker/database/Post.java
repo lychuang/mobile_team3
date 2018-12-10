@@ -13,6 +13,7 @@ public class Post {
     public String uid;
     public String name;
     public String buskerName;
+    public String buskerLocation;
     public String textDesc;
 
 
@@ -20,10 +21,11 @@ public class Post {
         // Default constructor required
     }
 
-    public Post(String uid, String name, String buskerName, String textDesc) {
+    public Post(String uid, String name, String buskerName, String buskerLocation, String textDesc) {
         this.uid = uid;
         this.name = name;
         this.buskerName = buskerName;
+        this.buskerLocation = buskerLocation;
         this.textDesc = textDesc;
     }
 
@@ -33,8 +35,9 @@ public class Post {
         HashMap<String, Object> result = new HashMap<>();
         result.put("uid", uid);
         result.put("name", name);
-        result.put("title", buskerName);
-        result.put("body", textDesc);
+        result.put("busker-name", buskerName);
+        result.put("busker-location", buskerLocation);
+        result.put("textDesc", textDesc);
 
         return result;
     }

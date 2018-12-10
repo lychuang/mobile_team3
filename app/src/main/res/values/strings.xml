@@ -7,6 +7,9 @@
     <string name="nav_account">Account</string>
     <string name="settings">Settings</string>
     <string name="placeholder_text">Placeholder Text</string>
+    <string name="busker_name">Busker Name</string>
+    <string name="post_desc">Post Description</string>
+    <string name="busker_location">Busker Location</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

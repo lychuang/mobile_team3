@@ -69,7 +69,9 @@ public class AddPostActivity extends AppCompatActivity {
     private Button postButton;
 
     private EditText buskerNameField;
+    private EditText buskerLocationField;
     private EditText textDescField;
+
 
 
 
@@ -86,6 +88,7 @@ public class AddPostActivity extends AppCompatActivity {
 
 
         buskerNameField = (EditText) findViewById(R.id.busker_name);
+        buskerLocationField = (EditText) findViewById(R.id.busker_location);
         textDescField = (EditText) findViewById(R.id.post_description);
         imageButton = (ImageButton) findViewById(R.id.photo_gallery_button);
         postButton = (Button) findViewById(R.id.post_btn);
@@ -120,6 +123,7 @@ public class AddPostActivity extends AppCompatActivity {
 
     private void addPost() {
         final String buskerName = buskerNameField.getText().toString();
+        final String buskerLocation = buskerLocationField.getText().toString();
         final String textDesc = textDescField.getText().toString();
 
         // Title is required
@@ -131,6 +135,11 @@ public class AddPostActivity extends AppCompatActivity {
         // Body is required
         if (TextUtils.isEmpty(textDesc)) {
             textDescField.setError(REQUIRED);
+            return;
+        }
+
+        if (TextUtils.isEmpty(buskerLocation)) {
+            buskerLocationField.setError(REQUIRED);
             return;
         }
 
@@ -156,7 +165,7 @@ public class AddPostActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             // Write new post
-                            writeNewPost(userId, user.getName(), buskerName, textDesc);
+                            writeNewPost(userId, user.getName(), buskerName, buskerLocation, textDesc);
                         }
 
                         // Finish this Activity, back to the stream
@@ -177,10 +186,10 @@ public class AddPostActivity extends AppCompatActivity {
     }
 
 
-    private void writeNewPost(String userId, String username, String title, String body) {
+    private void writeNewPost(String userId, String username, String buskerName, String buskerLocation, String textDesc) {
         // create in two paths simultaneously
         String key = ref.child("posts").push().getKey();
-        Post post = new Post(userId, username, title, body);
+        Post post = new Post(userId, username, buskerName, buskerLocation, textDesc);
         Map<String, Object> postValues = post.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();

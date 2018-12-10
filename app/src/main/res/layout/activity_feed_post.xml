@@ -42,11 +42,28 @@
         android:layout_below="@id/spring_dots_indicator">
 
         <TextView
+            android:id="@+id/busker_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:text="@string/placeholder_text"
+            android:text="@string/busker_name"
             android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:id="@+id/busker_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            android:text="@string/busker_location"/>
+
+        <TextView
+            android:id="@+id/post_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="@string/post_desc"
+            android:layout_marginTop="10dp" />
         
         
 
@@ -55,7 +72,7 @@
             android:id="@+id/tip_btn"
             android:layout_width="60dp"
             android:layout_height="30dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:background="@color/colorPrimaryDark"
             android:clickable="true"
             android:text="TIP"

@@ -33,30 +33,31 @@
                 tools:src="@drawable/stock"/>
 
             <TextView
-                android:id="@+id/item_username"
+                android:id="@+id/busker_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
                 android:layout_marginTop="8dp"
 
                 android:layout_weight="3"
-                android:text="@string/placeholder_text"
+                android:text="@string/busker_name"
                 android:textSize="15sp" />
 
             <TextView
-                android:id="@+id/item_location"
+                android:id="@+id/busker_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_weight="3"
-                android:text="@string/placeholder_text"
+                android:text="@string/busker_location"
                 android:textSize="12sp" />
 
             <TextView
+                android:id="@+id/post_description"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="4dp"
-                android:text="@string/placeholder_text"
+                android:text="@string/post_desc"
                 android:textSize="12sp" />
 
             <LinearLayout
