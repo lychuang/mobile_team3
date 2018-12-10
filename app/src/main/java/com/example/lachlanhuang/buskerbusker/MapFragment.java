@@ -153,6 +153,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     int mStartHour;
     int mStartMin;
+    int mStartYear;
+    int mStartMonth;
+    int mStartDay;
 
 
     Calendar mCalendar = new GregorianCalendar();
@@ -219,8 +222,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         Log.d("TAGA", "Description get");
                         settingDone = true;
 
-                        TimeDate start = new TimeDate(mYear, mMonth, mDay, mStartHour, mStartMin);
-                        TimeDate end = new TimeDate(mYear, mMonth, mDay, mHour, mMinute);
+                        TimeDate start = new TimeDate(mStartYear, mStartMonth, mStartDay, mStartHour, mStartMin);
+                        TimeDate end = new TimeDate(mStartYear, mStartMonth, mStartDay, mHour, mMinute);
 
                         Calendar mCalendar = new GregorianCalendar();
                         TimeZone mTimeZone = mCalendar.getTimeZone();
@@ -257,6 +260,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
+                        mStartYear = year;
+                        mStartMonth = monthOfYear;
+                        mStartDay = dayOfMonth;
                         //*************Call Time Picker Here ********************
                         timePicker(latLng, true);
                     }
@@ -532,6 +538,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         Log.d("TAGA", String.format("timezone: %d", timeZone));
 
+
+        Log.d("TAGA", String.format("date: %d vs %d", dateCode, startDateCode));
         if (dateCode == startDateCode) { //today
 
 
