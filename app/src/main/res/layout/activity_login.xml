@@ -27,11 +27,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:textSize="60sp"
+                android:textSize="50sp"
                 android:textColor="@color/colorWhite"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
-                android:text="Busker" />
+                android:text="Busk a Move" />
 
 
             <EditText
